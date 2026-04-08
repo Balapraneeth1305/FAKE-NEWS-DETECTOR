@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d14;--bg2:#13131e;--card:#17171f;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --txt:#eeeef5;--muted:#7878a0;
+  --real:#1fd99a;--fake:#ff4060;--warn:#ffb84d;--blue:#6b9ff5;
+}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+.page{max-width:680px;margin:0 auto;padding:32px 20px 48px}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(107,159,245,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(107,159,245,0.025) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:0}
+
+header{text-align:center;margin-bottom:32px;position:relative;z-index:1}
+.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(107,159,245,0.1);border:1px solid rgba(107,159,245,0.22);border-radius:100px;padding:5px 14px 5px 9px;font-size:11px;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;font-weight:500;margin-bottom:20px}
+.dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+h1{font-size:clamp(44px,9vw,76px);font-weight:800;letter-spacing:.03em;line-height:.95;color:var(--txt);margin-bottom:12px;font-family:system-ui,sans-serif}
+h1 span{color:var(--blue)}
+.sub{font-size:14px;color:var(--muted);max-width:400px;margin:0 auto;line-height:1.6;font-weight:300}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:14px;position:relative;z-index:1}
+.card-top{height:1px;position:absolute;top:0;left:20%;right:20%;background:rgba(107,159,245,0.3)}
+
+.field-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.field-label::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--blue)}
+textarea{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-family:system-ui,sans-serif;font-size:14px;color:var(--txt);resize:none;height:120px;line-height:1.6;outline:none;transition:border-color .2s}
+textarea::placeholder{color:rgba(120,120,160,0.45)}
+textarea:focus{border-color:rgba(107,159,245,0.4)}
+.row{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:10px}
+.cc{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.btn{display:flex;align-items:center;gap:8px;background:var(--txt);color:var(--bg);border:none;border-radius:9px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .15s;letter-spacing:.01em}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.spin{width:13px;height:13px;border:2px solid rgba(10,10,20,.3);border-top-color:var(--bg);border-radius:50%;animation:rot .6s linear infinite;display:none}
+@keyframes rot{to{transform:rotate(360deg)}}
+.btn.loading .spin{display:block}
+.btn.loading .btext{display:none}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.chip{font-size:11px;padding:4px 11px;border-radius:100px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.chip:hover{border-color:var(--border2);color:var(--txt);background:rgba(255,255,255,0.05)}
+
+.err{background:rgba(255,64,96,.08);border:1px solid rgba(255,64,96,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--fake);display:none;position:relative;z-index:1;margin-bottom:10px}
+.err.show{display:block}
+
+#rp{display:none;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;position:relative;z-index:1}
+#rp.on{display:block;opacity:1;transform:translateY(0)}
+
+.verdict{border-radius:18px;padding:26px;margin-bottom:12px;border:1px solid transparent}
+.verdict.real{border-color:rgba(31,217,154,.22);background:rgba(31,217,154,.04)}
+.verdict.fake{border-color:rgba(255,64,96,.22);background:rgba(255,64,96,.04)}
+.vtop-bar{height:2px;border-radius:0;margin:-26px -26px 22px;border-radius:16px 16px 0 0}
+.verdict.real .vtop-bar{background:linear-gradient(90deg,transparent,rgba(31,217,154,.5),transparent)}
+.verdict.fake .vtop-bar{background:linear-gradient(90deg,transparent,rgba(255,64,96,.5),transparent)}
+
+.vhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:12px;flex-wrap:wrap}
+.vicon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0}
+.verdict.real .vicon{background:rgba(31,217,154,.1);border:1px solid rgba(31,217,154,.22);color:var(--real)}
+.verdict.fake .vicon{background:rgba(255,64,96,.1);border:1px solid rgba(255,64,96,.22);color:var(--fake)}
+.vtitle{font-size:38px;font-weight:800;letter-spacing:.03em;line-height:1}
+.verdict.real .vtitle{color:var(--real)}
+.verdict.fake .vtitle{color:var(--fake)}
+.vsub{font-size:12px;color:var(--muted);margin-top:2px}
+.vconf{text-align:right}
+.cnum{font-size:46px;font-weight:800;line-height:1}
+.verdict.real .cnum{color:var(--real)}
+.verdict.fake .cnum{color:var(--fake)}
+.clabel{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+
+.bars{display:flex;flex-direction:column;gap:10px}
+.brow{display:flex;align-items:center;gap:10px}
+.blbl{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;width:38px;flex-shrink:0}
+.verdict.real .blbl.r{color:var(--real)}
+.verdict.real .blbl.f{color:rgba(255,64,96,.5)}
+.verdict.fake .blbl.f{color:var(--fake)}
+.verdict.fake .blbl.r{color:rgba(31,217,154,.5)}
+.track{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+.fill{height:100%;border-radius:100px;width:0;transition:width .9s cubic-bezier(.34,1.56,.64,1)}
+.fill.r{background:var(--real)}
+.fill.f{background:var(--fake)}
+.bpct{font-size:12px;width:40px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
+
+.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+.sbox{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+.snum{font-size:20px;font-weight:700;color:var(--txt);font-variant-numeric:tabular-nums}
+.slbl{font-size:10px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:3px}
+
+.sigs{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+.stitle{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sig{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:12px;color:rgba(238,238,245,.75);border-bottom:1px solid var(--border)}
+.sig:last-child{border-bottom:none}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sdot.w{background:var(--warn)}
+.sdot.ok{background:var(--real)}
+.sdot.i{background:var(--blue)}
+
+footer{text-align:center;padding-top:32px;font-size:11px;color:rgba(120,120,160,.35);letter-spacing:.04em;position:relative;z-index:1}
+</style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="page">
+      <header>
+        <div class="pill"><div class="dot-pulse"></div>ML-powered detection</div>
+        <h1>Fake News<span>Detector</span></h1>
+        <p class="sub">Paste any news headline or article snippet to instantly detect misinformation using your trained model.</p>
+      </header>
+
+      <div class="card">
+        <div class="card-top"></div>
+        <div class="field-label">Enter news text</div>
+        <textarea id="tin" placeholder="Paste a headline, article excerpt, or social media post…" maxlength="2000"></textarea>
+        <div class="row">
+          <span class="cc" id="cc">0 / 2000</span>
+          <button class="btn" id="abtn" onclick="go()">
+            <div class="spin"></div>
+            <span class="btext">Analyze →</span>
+          </button>
+        </div>
+        <div class="chips">
+          <span style="font-size:11px;color:var(--muted);align-self:center">Try:</span>
+          <div class="chip" onclick="se(this)">BJP wins Delhi elections</div>
+          <div class="chip" onclick="se(this)">SHOCKING: Govt hiding alien invasion!!</div>
+          <div class="chip" onclick="se(this)">India launches new space mission</div>
+          <div class="chip" onclick="se(this)">Hillary secret scandal exposed by insiders</div>
+        </div>
+      </div>
+
+      <div class="err" id="err"></div>
+
+      <div id="rp">
+        <div class="verdict" id="vc">
+          <div class="vtop-bar"></div>
+          <div class="vhead">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="vicon" id="vi"></div>
+              <div>
+                <div class="vtitle" id="vt"></div>
+                <div class="vsub" id="vs"></div>
+              </div>
+            </div>
+            <div class="vconf">
+              <div class="cnum" id="cn"></div>
+              <div class="clabel">Confidence</div>
+            </div>
+          </div>
+          <div class="bars">
+            <div class="brow">
+              <span class="blbl r">Real</span>
+              <div class="track"><div class="fill r" id="br"></div></div>
+              <span class="bpct" id="pr">0%</span>
+            </div>
+            <div class="brow">
+              <span class="blbl f">Fake</span>
+              <div class="track"><div class="fill f" id="bf"></div></div>
+              <span class="bpct" id="pf">0%</span>
+            </div>
+          </div>
+          <div class="sgrid">
+            <div class="sbox"><div class="snum" id="sw">—</div><div class="slbl">Words</div></div>
+            <div class="sbox"><div class="snum" id="sc">—</div><div class="slbl">Certainty</div></div>
+            <div class="sbox"><div class="snum" id="ss">—</div><div class="slbl">Signals</div></div>
+          </div>
+        </div>
+        <div class="sigs" id="sigbox" style="display:none">
+          <div class="stitle">Analysis signals</div>
+          <div id="sigl"></div>
+        </div>
+      </div>
+
+      <footer>Fake News Detector · Logistic Regression + TF-IDF · Research use only</footer>
+    </div>
+
+    <script>
+    const tin=document.getElementById('tin'),cc=document.getElementById('cc');
+    tin.addEventListener('input',()=>cc.textContent=tin.value.length+' / 2000');
+    tin.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')go()});
+    function se(el){tin.value=el.textContent;cc.textContent=tin.value.length+' / 2000';tin.focus()}
+
+    async function go(){
+      const txt=tin.value.trim();
+      const btn=document.getElementById('abtn');
+      const err=document.getElementById('err');
+      err.classList.remove('show');
+      if(txt.length<3){err.textContent='Please enter at least a few words.';err.classList.add('show');return}
+
+      btn.classList.add('loading');btn.disabled=true;
+
+      try {
+        const response = await fetch('/detect', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text: txt }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Process the response from your Flask API
+          const isReal = data.result === 'Real';
+          const fakeProb = data.fake_percentage;
+          const realProb = data.real_percentage;
+          const confidence = data.accuracy;
+
+          // Calculate word count
+          const words = txt.split(/\s+/).length;
+
+          // Generate signals based on text analysis
+          const signals = generateSignals(txt, isReal);
+
+          // Determine certainty level
+          const certainty = confidence >= 90 ? 'Very High' : confidence >= 75 ? 'High' : confidence >= 60 ? 'Moderate' : 'Low';
+
+          render({
+            label: isReal ? 'REAL' : 'FAKE',
+            conf: confidence,
+            pReal: realProb,
+            pFake: fakeProb,
+            words: words,
+            cert: certainty,
+            signals: signals
+          });
+        } else {
+          err.textContent = data.error || 'An error occurred during analysis.';
+          err.classList.add('show');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        err.textContent = 'Failed to connect to the server. Please try again.';
+        err.classList.add('show');
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    function generateSignals(text, isReal) {
+      const signals = [];
+      const hasCaps = (text.replace(/[^A-Z]/g, '').length / text.length) > 0.25;
+      const hasEx = text.split('!').length - 1;
+      const hasSens = /shocking|secret|exposed|hidden|truth|conspiracy|aliens|scandal|breaking|exclusive/i.test(text);
+
+      if (hasCaps) signals.push({t: 'w', tx: 'High use of capital letters'});
+      if (hasEx > 1) signals.push({t: 'w', tx: hasEx + ' exclamation marks detected'});
+      if (hasSens) signals.push({t: 'w', tx: 'Sensational language detected'});
+
+      if (!signals.length && isReal) {
+        signals.push({t: 'ok', tx: 'Neutral, factual language patterns'});
+      }
+
+      return signals;
+    }
+
+    function render(d){
+      const isReal=d.label==='REAL';
+      const vc=document.getElementById('vc');
+      vc.className='verdict '+(isReal?'real':'fake');
+      document.getElementById('vi').textContent=isReal?'✓':'✕';
+      document.getElementById('vt').textContent=isReal?'Likely Real':'Likely Fake';
+      document.getElementById('vs').textContent=isReal?'Content appears credible':'Misinformation patterns detected';
+      document.getElementById('cn').textContent=d.conf.toFixed(1)+'%';
+      document.getElementById('pr').textContent=d.pReal.toFixed(1)+'%';
+      document.getElementById('pf').textContent=d.pFake.toFixed(1)+'%';
+      document.getElementById('sw').textContent=d.words;
+      document.getElementById('sc').textContent=d.cert;
+      document.getElementById('ss').textContent=d.signals.length;
+      setTimeout(()=>{
+        document.getElementById('br').style.width=d.pReal+'%';
+        document.getElementById('bf').style.width=d.pFake+'%';
+      },80);
+      const sigl=document.getElementById('sigl');
+      const sigbox=document.getElementById('sigbox');
+      if(d.signals.length){
+        sigl.innerHTML=d.signals.map(s=>`<div class="sig"><div class="sdot ${s.t}"></div><span>${s.tx}</span></div>`).join('');
+        sigbox.style.display='block';
+      }else{sigbox.style.display='none'}
+      const rp=document.getElementById('rp');
+      rp.style.display='block';
+      requestAnimationFrame(()=>rp.classList.add('on'));
+    }
+    </script>
+</body>
+</html>

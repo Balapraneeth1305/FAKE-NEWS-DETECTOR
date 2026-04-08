@@ -6,49 +6,60 @@ A web-based application that uses machine learning to detect fake news articles.
 
 - **Real-time Detection**: Input news text and get instant classification results
 - **Confidence Scores**: View probability percentages for both real and fake classifications
-- **Text Analysis**: Automatic detection of sensational language patterns
-- **Retraining Capability**: Update the model with new data and user feedback
-- **Responsive Web Interface**: Modern, dark-themed UI that works on desktop and mobile
+- **Web API**: Flask backend exposes `/detect` for model predictions
+- **Retraining Scripts**: Update the model with new dataset files
+- **Docker Support**: Build and run the app in a container
 
 ## Installation
 
 ### Prerequisites
 - Python 3.8 or higher
 - pip package manager
+- Git (recommended)
 
 ### Setup
 1. Clone or download the project files
-2. Navigate to the project directory
+2. Navigate to the project directory:
+   ```bash
+   cd "c:\FAKE NEWS DETECTOR"
+   ```
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-4. Download NLTK data (required for text preprocessing):
+4. Download NLTK data if you retrain or preprocess text:
    ```python
    import nltk
    nltk.download('stopwords')
    nltk.download('wordnet')
    ```
 
-## Usage
+## Running the Application
 
-### Running the Application
-1. Ensure the model files (`model/fake_news_model.pkl` and `model/tfidf_vectorizer.pkl`) exist
-2. Run the Flask application:
+1. Ensure the model files exist in `model/`:
+   - `model/fake_news_model.pkl`
+   - `model/tfidf_vectorizer.pkl`
+2. Start the app:
    ```bash
    python app.py
    ```
-3. Open your browser and navigate to `http://localhost:5000`
+3. Open your browser at:
+   ```bash
+   http://localhost:5000
+   ```
 
-### API Usage
+## API Usage
+
 Send a POST request to `/detect` with JSON payload:
+
 ```json
 {
   "text": "Your news article text here"
 }
 ```
 
-Response:
+Example response:
+
 ```json
 {
   "result": "Fake",
@@ -58,50 +69,79 @@ Response:
 }
 ```
 
-### Retraining the Model
-Use the provided retraining scripts to update the model with new data:
-- `retrain.py`: Retrains with existing data plus database feedback
-- `retrain_with_new_data.py`: Retrains with new CSV data
-- `retrain_kaggle.py`: Downloads and retrains with Kaggle datasets
+## Docker Usage
+
+Build the Docker image:
+
+```bash
+docker build -t fake-news-detector .
+```
+
+Run the container:
+
+```bash
+docker run -p 5000:5000 fake-news-detector
+```
+
+Then open:
+
+```bash
+http://localhost:5000
+```
+
+## Pushing to GitHub
+
+1. Create a repository on GitHub.
+2. Add the remote:
+   ```bash
+   git remote add origin https://github.com/<your-username>/<repo-name>.git
+   ```
+3. Push the current branch:
+   ```bash
+   git push -u origin main
+   ```
 
 ## Project Structure
 
 ```
 ├── app.py                 # Flask web application
-├── index.html            # Frontend interface
-├── styles.css            # CSS styling
-├── script.js             # Frontend JavaScript
-├── requirements.txt      # Python dependencies
-├── model/                # Trained model files
+├── index.html             # Frontend interface
+├── styles.css             # CSS styling
+├── script.js              # Frontend JavaScript
+├── requirements.txt       # Python dependencies
+├── Dockerfile             # Container build definition
+├── .gitignore             # Ignored files for Git
+├── model/                 # Trained model files
 │   ├── fake_news_model.pkl
 │   └── tfidf_vectorizer.pkl
-├── Notebook/             # Jupyter notebooks
+├── Notebook/              # Jupyter notebooks
 │   └── 01_data_validation.ipynb
-├── retrain*.py           # Model retraining scripts
-└── *.csv                 # Training datasets
+├── retrain.py             # Model retraining script
+├── retrain_with_new_data.py
+├── retrain_kaggle.py
+└── *.csv                  # Training datasets
 ```
 
 ## Model Details
 
 - **Algorithm**: Logistic Regression with TF-IDF vectorization
-- **Features**: 5000 most frequent words
-- **Training Data**: Multiple news datasets including FakeNewsNet and BBC news
-- **Accuracy**: Approximately 85-90% (varies by dataset)
+- **Features**: TF-IDF text vectors from news content
+- **Training Data**: Several news datasets including FakeNewsNet and BBC news
+- **Accuracy**: Depends on dataset quality and may vary
 
 ## Limitations
 
-- Model trained on English news articles only
-- May not perform well on very short texts or non-news content
-- Accuracy depends on training data quality and quantity
-- No real-time fact-checking against external sources
-- Basic NLP approach (not using modern transformers like BERT)
+- Trained on English news articles only
+- May not perform well on very short or noisy text
+- No live fact-checking or external verification
+- Basic model approach (not transformer-based)
 
 ## Security Notes
 
-- This is a development version with debug mode enabled
-- For production use, disable debug mode and implement proper security measures
-- Model files use pickle (insecure for untrusted data)
-- No input validation or rate limiting implemented
+- The app is intended for development and demo use
+- Do not expose the Flask dev server directly in production
+- Pickle files are not safe if loaded from untrusted sources
+- Add authentication, input validation, and rate limiting for production
 
 ## Contributing
 
@@ -113,4 +153,4 @@ Use the provided retraining scripts to update the model with new data:
 
 ## License
 
-This project is for educational purposes. Please check individual dataset licenses for usage rights.
+This project is for educational purposes. Please check the dataset licenses before reuse.

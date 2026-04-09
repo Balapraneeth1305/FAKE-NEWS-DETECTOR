@@ -9,6 +9,9 @@ A web-based application that uses machine learning to detect fake news articles.
 - **Web API**: Flask backend exposes `/detect` for model predictions
 - **Retraining Scripts**: Update the model with new dataset files
 - **Docker Support**: Build and run the app in a container
+- **User Feedback System**: Collect and use user feedback to improve the model
+- **Prediction History**: View past predictions and analytics
+- **Input Validation**: Robust validation and error handling
 
 ## Installation
 
@@ -33,6 +36,10 @@ A web-based application that uses machine learning to detect fake news articles.
    nltk.download('stopwords')
    nltk.download('wordnet')
    ```
+5. Initialize the database:
+   ```bash
+   python init_db.py
+   ```
 
 ## Running the Application
 
@@ -47,6 +54,150 @@ A web-based application that uses machine learning to detect fake news articles.
    ```bash
    http://localhost:5000
    ```
+
+## API Usage
+
+### Detection Endpoint
+Send a POST request to `/detect` with JSON payload:
+
+```json
+{
+  "text": "Recent studies show that the election was the most secure in history according to election officials"
+}
+```
+
+Example response:
+```json
+{
+  "result": "Real",
+  "fake_percentage": 23.45,
+  "real_percentage": 76.55,
+  "accuracy": 76.55,
+  "detection_id": 123
+}
+```
+
+### Feedback Endpoint
+Submit feedback for a prediction:
+
+```bash
+POST /feedback/123
+Content-Type: application/json
+
+{
+  "feedback": "real"
+}
+```
+
+### History Endpoint
+Get recent predictions:
+
+```bash
+GET /history?limit=10
+```
+
+Response:
+```json
+{
+  "history": [
+    {
+      "id": 123,
+      "input_text": "News article text...",
+      "prediction": "Real",
+      "confidence": 76.55,
+      "feedback": null,
+      "timestamp": "2024-01-15T10:30:00"
+    }
+  ],
+  "total": 1
+}
+```
+
+## Retraining the Model
+
+### With User Feedback
+```bash
+python retrain.py
+```
+
+### With New Datasets
+```bash
+python retrain_with_new_data.py
+```
+
+### From Kaggle
+```bash
+python retrain_kaggle.py
+```
+
+## Docker Usage
+
+Build the Docker image:
+```bash
+docker build -t fake-news-detector .
+```
+
+Run the container:
+```bash
+docker run -p 5000:5000 fake-news-detector
+```
+
+Then open:
+```bash
+http://localhost:5000
+```
+
+## Project Structure
+
+```
+fake-news-detector/
+├── app.py                 # Main Flask application
+├── init_db.py            # Database initialization
+├── retrain.py            # Retrain with feedback
+├── retrain_with_new_data.py  # Retrain with new datasets
+├── retrain_kaggle.py     # Retrain from Kaggle
+├── requirements.txt      # Python dependencies
+├── Dockerfile           # Docker configuration
+├── index.html          # Frontend interface
+├── script.js           # Frontend JavaScript
+├── styles.css          # Frontend styling
+├── model/              # Trained models
+│   ├── fake_news_model.pkl
+│   └── tfidf_vectorizer.pkl
+├── Notebook/           # Jupyter notebooks
+├── cleaned_fake_news_dataset.csv  # Training data
+└── feedback.db         # SQLite database (created automatically)
+```
+
+## Model Details
+
+- **Algorithm**: Logistic Regression
+- **Features**: TF-IDF vectorization (5,000 features)
+- **Training Data**: 4,000+ news articles (balanced real/fake)
+- **Accuracy**: ~85-90% on test set
+- **Input**: Raw text (10-10,000 characters)
+- **Output**: Binary classification with confidence scores
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Recent Improvements
+
+- ✅ Added database integration for feedback collection
+- ✅ Implemented input validation and error handling
+- ✅ Added prediction history and analytics
+- ✅ Improved error messages and user experience
+- ✅ Added comprehensive logging
+- ✅ Enhanced security with input sanitization
 
 ## API Usage
 

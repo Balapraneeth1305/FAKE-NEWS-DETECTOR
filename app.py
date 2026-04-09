@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import numpy as np
 
 app = Flask(__name__, static_folder='.')
 
@@ -15,6 +16,24 @@ db = SQLAlchemy(app)
 MODEL_DIR = Path(__file__).resolve().parent / 'model'
 MODEL_FILE = MODEL_DIR / 'fake_news_model.pkl'
 VECTORIZER_FILE = MODEL_DIR / 'tfidf_vectorizer.pkl'
+
+# Temperature-scaled model class for probability calibration
+class TemperatureScaledModel:
+    """Model wrapper that applies temperature scaling to calibrate probabilities"""
+    def __init__(self, base_model, temperature=1.0):
+        self.base_model = base_model
+        self.temperature = temperature
+    
+    def predict_proba(self, X):
+        """Get calibrated probability predictions"""
+        logits = self.base_model.decision_function(X)
+        probs = 1.0 / (1.0 + np.exp(-logits / self.temperature))
+        return np.column_stack([1 - probs, probs])
+    
+    def predict(self, X):
+        """Get binary predictions"""
+        probs = self.predict_proba(X)
+        return (probs[:, 1] > 0.5).astype(int)
 
 # Database model for feedback
 class Detection(db.Model):

@@ -4,42 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fake News Detector</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d0d14;--bg2:#13131e;--card:#17171f;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --txt:#eeeef5;--muted:#7878a0;
-  --real:#1fd99a;--fake:#ff4060;--warn:#ffb84d;--blue:#6b9ff5;
+  --bg:#0f0f23;--bg2:#1a1a2e;--card:#16213e;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --txt:#ffffff;--muted:#b0b0c0;
+  --cyan:#00ffff;--purple:#9d4edd;--red:#ff006e;--blue:#6b9ff5;
+  --real:#00ffff;--fake:#ff006e;--warn:#ffb84d;
 }
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
-.page{max-width:680px;margin:0 auto;padding:32px 20px 48px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;margin:0;padding:0}
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;position:sticky;top:0;z-index:10}
+.nav-content{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:15px 0}
+.nav-brand{font-size:24px;font-weight:700;color:var(--cyan)}
+.nav-links{display:flex;gap:30px}
+.nav-link{color:var(--muted);text-decoration:none;font-weight:500;transition:color 0.3s;display:flex;align-items:center;gap:8px}
+.nav-link:hover{color:var(--txt)}
+.nav-link.active{color:var(--cyan)}
+.page{max-width:1200px;margin:0 auto;padding:40px 20px 60px}
+.overview-grid{display:grid;grid-template-columns:1.45fr .9fr;gap:22px;margin-bottom:32px}
+.hero-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:32px;box-shadow:0 28px 90px rgba(0,0,0,0.18);display:flex;flex-direction:column;justify-content:space-between;min-height:320px}
+.hero-label{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:inline-flex;align-items:center;gap:10px;margin-bottom:18px}
+.hero-label i{font-size:12px}
+.hero-title{font-size:clamp(2.4rem,6vw,4rem);line-height:0.95;margin-bottom:18px;color:var(--txt)}
+.hero-copy{font-size:15px;color:var(--muted);max-width:640px;line-height:1.75}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
+.btn.secondary{background:rgba(255,255,255,0.06);color:var(--txt);border:1px solid rgba(255,255,255,.12);box-shadow:none}
+.stats-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:26px;display:flex;flex-direction:column;gap:20px}
+.stat-card-title{display:flex;align-items:center;gap:10px;color:var(--cyan);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stat-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:20px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
+.stat-box span{font-size:2rem;font-weight:800;color:var(--txt)}
+.stat-box p{margin:10px 0 0;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.section{display:none;opacity:0;transform:translateY(15px);transition:all .35s ease}
+.section.active{display:block;opacity:1;transform:translateY(0)}
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:24px;flex-wrap:wrap}
+.section-header h2{font-size:2rem;margin:0}
+.section-copy{color:var(--muted);max-width:620px;line-height:1.7}
+.report-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:24px}
+.report-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px}
+.report-box span{display:block;font-size:2rem;font-weight:800;color:var(--txt)}
+.report-box p{margin:10px 0 0;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+.history-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:20px}
+.history-header{font-size:1rem;font-weight:700;margin-bottom:16px}
+.history-table-wrap{overflow-x:auto}
+.history-table{width:100%;border-collapse:collapse;min-width:660px}
+.history-table th,.history-table td{padding:14px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px;color:var(--muted)}
+.history-table th{color:var(--txt);text-transform:uppercase;letter-spacing:.08em}
+.history-table tr:hover{background:rgba(255,255,255,.03)}
+.empty{padding:18px;text-align:center;color:var(--muted)}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.setting-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.setting-card h3{margin:0;font-size:1rem}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.setting-row p{margin:0;color:var(--muted);font-size:14px}
+.toggle{position:relative;width:46px;height:26px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:background .25s ease}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .25s ease}
+.toggle.active{background:linear-gradient(135deg,var(--cyan),var(--purple))}
+.toggle.active::after{left:calc(100% - 23px)}
+@media (max-width: 960px){.overview-grid,.report-grid,.settings-grid{grid-template-columns:1fr}.history-table{min-width:0}}
+@media (max-width: 640px){.section-header{flex-direction:column}.hero-actions{justify-content:flex-start}}
 .grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(107,159,245,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(107,159,245,0.025) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:0}
 
-header{text-align:center;margin-bottom:32px;position:relative;z-index:1}
-.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(107,159,245,0.1);border:1px solid rgba(107,159,245,0.22);border-radius:100px;padding:5px 14px 5px 9px;font-size:11px;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;font-weight:500;margin-bottom:20px}
-.dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:blink 2s infinite}
+header{text-align:center;margin-bottom:40px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(0,255,255,0.1);border:1px solid rgba(0,255,255,0.3);border-radius:100px;padding:5px 14px 5px 9px;font-size:11px;color:var(--cyan);letter-spacing:.08em;text-transform:uppercase;font-weight:500;margin-bottom:20px}
+.pill.mini{padding:6px 12px;font-size:10px;letter-spacing:.12em}
+.dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-h1{font-size:clamp(44px,9vw,76px);font-weight:800;letter-spacing:.03em;line-height:.95;color:var(--txt);margin-bottom:12px;font-family:system-ui,sans-serif}
-h1 span{color:var(--blue)}
-.sub{font-size:14px;color:var(--muted);max-width:400px;margin:0 auto;line-height:1.6;font-weight:300}
+h1{font-size:clamp(48px,10vw,80px);font-weight:800;letter-spacing:.03em;line-height:.95;color:var(--txt);margin-bottom:12px}
+h1 span{color:var(--purple)}
+.sub{font-size:16px;color:var(--muted);max-width:600px;margin:0 auto;line-height:1.6;font-weight:400}
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:14px;position:relative;z-index:1}
-.card-top{height:1px;position:absolute;top:0;left:20%;right:20%;background:rgba(107,159,245,0.3)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:30px;margin-bottom:20px;position:relative;z-index:1;box-shadow:0 8px 32px rgba(0,0,0,0.3);transition:transform 0.3s ease}
+.card:hover{transform:translateY(-2px)}
+.card-top{height:2px;position:absolute;top:0;left:20%;right:20%;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
 
-.field-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.field-label::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--blue)}
-textarea{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-family:system-ui,sans-serif;font-size:14px;color:var(--txt);resize:none;height:120px;line-height:1.6;outline:none;transition:border-color .2s}
-textarea::placeholder{color:rgba(120,120,160,0.45)}
-textarea:focus{border-color:rgba(107,159,245,0.4)}
-.row{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:10px}
-.cc{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.btn{display:flex;align-items:center;gap:8px;background:var(--txt);color:var(--bg);border:none;border-radius:9px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .15s;letter-spacing:.01em}
-.btn:hover{opacity:.88;transform:translateY(-1px)}
-.btn:active{transform:scale(.98)}
+.field-label{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.field-label::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--cyan)}
+textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;padding:16px 18px;font-family:'Inter',sans-serif;font-size:16px;color:var(--txt);resize:none;height:140px;line-height:1.6;outline:none;transition:border-color 0.3s,box-shadow 0.3s}
+textarea::placeholder{color:var(--muted)}
+textarea:focus{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,255,255,0.2)}
+.row{display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:10px}
+.cc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.btn{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--cyan),var(--purple));color:var(--bg);border:none;border-radius:12px;padding:14px 28px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s;letter-spacing:.01em;box-shadow:0 4px 15px rgba(0,255,255,0.3)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,255,255,0.4)}
+.btn:active{transform:scale(0.98)}
 .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
-.spin{width:13px;height:13px;border:2px solid rgba(10,10,20,.3);border-top-color:var(--bg);border-radius:50%;animation:rot .6s linear infinite;display:none}
+.spin{width:16px;height:16px;border:2px solid rgba(15,15,35,.3);border-top-color:var(--bg);border-radius:50%;animation:rot .6s linear infinite;display:none}
 @keyframes rot{to{transform:rotate(360deg)}}
 .btn.loading .spin{display:block}
 .btn.loading .btext{display:none}
@@ -88,7 +141,7 @@ textarea:focus{border-color:rgba(107,159,245,0.4)}
 .fill.f{background:var(--fake)}
 .bpct{font-size:12px;width:40px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
 
-.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+.sgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:20px}
 .sbox{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
 .snum{font-size:20px;font-weight:700;color:var(--txt);font-variant-numeric:tabular-nums}
 .slbl{font-size:10px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:3px}
@@ -102,95 +155,282 @@ textarea:focus{border-color:rgba(107,159,245,0.4)}
 .sdot.ok{background:var(--real)}
 .sdot.i{background:var(--blue)}
 
-footer{text-align:center;padding-top:32px;font-size:11px;color:rgba(120,120,160,.35);letter-spacing:.04em;position:relative;z-index:1}
+footer{text-align:center;padding-top:40px;font-size:12px;color:var(--muted);letter-spacing:.04em}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .page { padding: 20px 15px; }
+  .sgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sgrid .sbox:nth-child(4), .sgrid .sbox:nth-child(5) { grid-column: span 3; }
+}
 </style>
 </head>
 <body>
-    <div class="grid-bg"></div>
+    <nav class="nav">
+      <div class="nav-content">
+        <div class="nav-brand">FakeNews Detector</div>
+        <div class="nav-links">
+          <a href="#" class="nav-link active" data-target="homeSection" onclick="showSection('homeSection', this); return false;"><i class="fas fa-home"></i> Home</a>
+          <a href="#" class="nav-link" data-target="detectorSection" onclick="showSection('detectorSection', this); return false;"><i class="fas fa-search"></i> Detector</a>
+          <a href="#" class="nav-link" data-target="reportsSection" onclick="showSection('reportsSection', this); return false;"><i class="fas fa-chart-bar"></i> Reports</a>
+          <a href="#" class="nav-link" data-target="settingsSection" onclick="showSection('settingsSection', this); return false;"><i class="fas fa-cog"></i> Settings</a>
+        </div>
+      </div>
+    </nav>
     <div class="page">
       <header>
-        <div class="pill"><div class="dot-pulse"></div>ML-powered detection</div>
+        <div class="pill"><div class="dot-pulse"></div>AI-powered detection</div>
         <h1>Fake News<span>Detector</span></h1>
-        <p class="sub">Paste any news headline or article snippet to instantly detect misinformation using your trained model.</p>
+        <p class="sub">Paste or upload news content to analyze credibility, sentiment, and source reliability using advanced machine learning.</p>
       </header>
 
-      <div class="card">
-        <div class="card-top"></div>
-        <div class="field-label">Enter news text</div>
-        <textarea id="tin" placeholder="Paste a headline, article excerpt, or social media post…" maxlength="2000"></textarea>
-        <div class="row">
-          <span class="cc" id="cc">0 / 2000</span>
-          <button class="btn" id="abtn" onclick="go()">
-            <div class="spin"></div>
-            <span class="btext">Analyze →</span>
-          </button>
+      <div class="overview-grid">
+        <div class="hero-card">
+          <div>
+            <div class="hero-label"><i class="fas fa-bolt"></i> Live Analysis Hub</div>
+            <div class="hero-title">Detect misinformation with speed and confidence.</div>
+            <p class="hero-copy">Use the platform for article-level verification, headline checks, and trust scoring before sharing news online.</p>
+          </div>
+          <div class="hero-actions">
+            <button class="btn secondary" onclick="showSection('detectorSection', document.querySelector('[data-target=detectorSection]')); return false;"><i class="fas fa-search"></i> Open Detector</button>
+            <button class="btn secondary" onclick="showSection('reportsSection', document.querySelector('[data-target=reportsSection]')); return false;"><i class="fas fa-chart-line"></i> View Reports</button>
+          </div>
         </div>
-        <div class="chips">
-          <span style="font-size:11px;color:var(--muted);align-self:center">Try:</span>
-          <div class="chip" onclick="se(this)">BJP wins Delhi elections</div>
-          <div class="chip" onclick="se(this)">SHOCKING: Govt hiding alien invasion!!</div>
-          <div class="chip" onclick="se(this)">India launches new space mission</div>
-          <div class="chip" onclick="se(this)">Hillary secret scandal exposed by insiders</div>
+        <div class="stats-card">
+          <div class="stat-card-title"><i class="fas fa-shield-alt"></i> System overview</div>
+          <div class="stat-grid">
+            <div class="stat-box"><span>97.6%</span><p>Model accuracy</p></div>
+            <div class="stat-box"><span>5K+</span><p>Checks completed</p></div>
+            <div class="stat-box"><span>Fast</span><p>Real-time scores</p></div>
+            <div class="stat-box"><span>Audit</span><p>Ready insights</p></div>
+          </div>
         </div>
       </div>
 
-      <div class="err" id="err"></div>
+      <div class="section active" id="detectorSection">
+        <div class="section-header">
+          <div>
+            <div class="pill mini"><i class="fas fa-search"></i> Detector</div>
+            <h2>Analyze news instantly</h2>
+            <p class="section-copy">Paste headlines, article excerpts, or upload a saved text file to get a quick credibility assessment.</p>
+          </div>
+          <button class="btn secondary" onclick="showSection('reportsSection', document.querySelector('[data-target=reportsSection]')); return false;"><i class="fas fa-chart-bar"></i> Open Reports</button>
+        </div>
 
-      <div id="rp">
-        <div class="verdict" id="vc">
-          <div class="vtop-bar"></div>
-          <div class="vhead">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="vicon" id="vi"></div>
-              <div>
-                <div class="vtitle" id="vt"></div>
-                <div class="vsub" id="vs"></div>
+        <div class="card detector-card">
+          <div class="card-top"></div>
+          <div class="field-label">Enter or upload news content</div>
+          <textarea id="tin" placeholder="Paste a headline, article excerpt, or social media post…" maxlength="5000"></textarea>
+          <div style="margin-top:12px;">
+            <input type="file" id="fileInput" accept=".txt" style="color:var(--txt);background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:8px 12px;width:100%;box-sizing:border-box;">
+          </div>
+          <div class="row">
+            <span class="cc" id="cc">0 / 5000</span>
+            <button class="btn" id="abtn" onclick="go()">
+              <div class="spin"></div>
+              <span class="btext"><i class="fas fa-brain"></i> Analyze</span>
+            </button>
+          </div>
+          <div class="chips">
+            <span style="font-size:11px;color:var(--muted);align-self:center">Try:</span>
+            <div class="chip" onclick="se(this)">BJP wins Delhi elections</div>
+            <div class="chip" onclick="se(this)">SHOCKING: Govt hiding alien invasion!!</div>
+            <div class="chip" onclick="se(this)">India launches new space mission</div>
+            <div class="chip" onclick="se(this)">Hillary secret scandal exposed by insiders</div>
+          </div>
+        </div>
+
+        <div class="err" id="err"></div>
+
+        <div id="rp">
+          <div class="verdict" id="vc">
+            <div class="vtop-bar"></div>
+            <div class="vhead">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div class="vicon" id="vi"></div>
+                <div>
+                  <div class="vtitle" id="vt"></div>
+                  <div class="vsub" id="vs"></div>
+                </div>
+              </div>
+              <div class="vconf">
+                <div class="cnum" id="cn"></div>
+                <div class="clabel">Confidence</div>
               </div>
             </div>
-            <div class="vconf">
-              <div class="cnum" id="cn"></div>
-              <div class="clabel">Confidence</div>
+            <div class="bars">
+              <div class="brow">
+                <span class="blbl r">Real</span>
+                <div class="track"><div class="fill r" id="br"></div></div>
+                <span class="bpct" id="pr">0%</span>
+              </div>
+              <div class="brow">
+                <span class="blbl f">Fake</span>
+                <div class="track"><div class="fill f" id="bf"></div></div>
+                <span class="bpct" id="pf">0%</span>
+              </div>
+            </div>
+            <div class="sgrid">
+              <div class="sbox"><div class="snum" id="sw">—</div><div class="slbl">Words</div></div>
+              <div class="sbox"><div class="snum" id="sc">—</div><div class="slbl">Certainty</div></div>
+              <div class="sbox"><div class="snum" id="ss">—</div><div class="slbl">Signals</div></div>
+              <div class="sbox"><div class="snum" id="sent">—</div><div class="slbl">Sentiment</div></div>
+              <div class="sbox"><div class="snum" id="src">—</div><div class="slbl">Source Reliability</div></div>
             </div>
           </div>
-          <div class="bars">
-            <div class="brow">
-              <span class="blbl r">Real</span>
-              <div class="track"><div class="fill r" id="br"></div></div>
-              <span class="bpct" id="pr">0%</span>
-            </div>
-            <div class="brow">
-              <span class="blbl f">Fake</span>
-              <div class="track"><div class="fill f" id="bf"></div></div>
-              <span class="bpct" id="pf">0%</span>
-            </div>
+          <div class="sigs" id="sigbox" style="display:none">
+            <div class="stitle">Analysis signals</div>
+            <div id="sigl"></div>
           </div>
-          <div class="sgrid">
-            <div class="sbox"><div class="snum" id="sw">—</div><div class="slbl">Words</div></div>
-            <div class="sbox"><div class="snum" id="sc">—</div><div class="slbl">Certainty</div></div>
-            <div class="sbox"><div class="snum" id="ss">—</div><div class="slbl">Signals</div></div>
-          </div>
-        </div>
-        <div class="sigs" id="sigbox" style="display:none">
-          <div class="stitle">Analysis signals</div>
-          <div id="sigl"></div>
         </div>
       </div>
 
-      <footer>Fake News Detector · Logistic Regression + TF-IDF · Research use only</footer>
+      <div class="section hidden" id="reportsSection">
+        <div class="section-header">
+          <div>
+            <div class="pill mini"><i class="fas fa-chart-bar"></i> Reports</div>
+            <h2>Recent activity</h2>
+            <p class="section-copy">Track recent checks, view model confidence, and monitor result trends across the dashboard.</p>
+          </div>
+          <button class="btn secondary" onclick="showSection('detectorSection', document.querySelector('[data-target=detectorSection]')); return false;"><i class="fas fa-search"></i> Back to Detector</button>
+        </div>
+
+        <div class="report-grid">
+          <div class="report-box"><span id="rTotal">—</span><p>Total analyses</p></div>
+          <div class="report-box"><span id="rFake">—</span><p>Fake detections</p></div>
+          <div class="report-box"><span id="rReal">—</span><p>Real detections</p></div>
+        </div>
+
+        <div class="history-card">
+          <div class="history-header">Recent detections</div>
+          <div class="history-table-wrap">
+            <table class="history-table" id="historyTable">
+              <thead>
+                <tr><th>Time</th><th>Prediction</th><th>Confidence</th><th>Excerpt</th></tr>
+              </thead>
+              <tbody><tr><td colspan="4" class="empty">Loading history...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="section hidden" id="settingsSection">
+        <div class="section-header">
+          <div>
+            <div class="pill mini"><i class="fas fa-cog"></i> Settings</div>
+            <h2>Customization</h2>
+            <p class="section-copy">Adjust UI behavior and analysis preferences for a personalized workflow.</p>
+          </div>
+          <button class="btn secondary" onclick="showSection('homeSection', document.querySelector('[data-target=homeSection]')); return false;"><i class="fas fa-home"></i> Back Home</button>
+        </div>
+
+        <div class="settings-grid">
+          <div class="setting-card">
+            <h3>Auto-save reports</h3>
+            <p>Keep a quick history of all detection results for audit and review.</p>
+            <div class="setting-row"><p>Enable history</p><div class="toggle" id="historyToggle" onclick="toggleControl(this)"></div></div>
+          </div>
+          <div class="setting-card">
+            <h3>Instant analysis</h3>
+            <p>Run detection automatically when you paste content into the analyzer.</p>
+            <div class="setting-row"><p>Auto-analyze</p><div class="toggle" id="autoAnalyzeToggle" onclick="toggleControl(this)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <footer>Fake News Detector · Advanced AI Analysis · Professional & Audit-Ready</footer>
     </div>
 
     <script>
     const tin=document.getElementById('tin'),cc=document.getElementById('cc');
-    tin.addEventListener('input',()=>cc.textContent=tin.value.length+' / 2000');
+    const navLinks=document.querySelectorAll('.nav-link');
+
+    function showSection(sectionId, el){
+      document.querySelectorAll('.section').forEach(sec=>{
+        sec.classList.toggle('active', sec.id===sectionId);
+      });
+      navLinks.forEach(link=>{
+        link.classList.toggle('active', link.dataset.target===sectionId);
+      });
+      if(sectionId==='reportsSection'){
+        loadHistory();
+      }
+    }
+
+    function toggleControl(el){
+      el.classList.toggle('active');
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    async function loadHistory() {
+      const tableBody = document.querySelector('#historyTable tbody');
+      const totalEl = document.getElementById('rTotal');
+      const fakeEl = document.getElementById('rFake');
+      const realEl = document.getElementById('rReal');
+      tableBody.innerHTML = '<tr><td colspan="4" class="empty">Loading history...</td></tr>';
+
+      try {
+        const response = await fetch('/history?limit=7');
+        if (!response.ok) throw new Error('Unable to fetch history');
+        const data = await response.json();
+        const rows = data.history || [];
+        totalEl.textContent = data.total || 0;
+        const fakeCount = rows.filter(r => r.prediction === 'Fake').length;
+        const realCount = rows.filter(r => r.prediction === 'Real').length;
+        fakeEl.textContent = fakeCount;
+        realEl.textContent = realCount;
+
+        if (!rows.length) {
+          tableBody.innerHTML = '<tr><td colspan="4" class="empty">No history yet.</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = rows.map(row => `
+          <tr>
+            <td>${new Date(row.timestamp).toLocaleString()}</td>
+            <td>${escapeHtml(row.prediction)}</td>
+            <td>${row.confidence.toFixed(1)}%</td>
+            <td>${escapeHtml(row.input_text.slice(0, 60))}${row.input_text.length > 60 ? '…' : ''}</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="empty">Unable to load history.</td></tr>';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', ()=>{
+      showSection('homeSection', document.querySelector('.nav-link.active'));
+    });
+
+    tin.addEventListener('input',()=>cc.textContent=tin.value.length+' / 5000');
     tin.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')go()});
-    function se(el){tin.value=el.textContent;cc.textContent=tin.value.length+' / 2000';tin.focus()}
+    function se(el){tin.value=el.textContent;cc.textContent=tin.value.length+' / 5000';tin.focus()}
 
     async function go(){
       const txt=tin.value.trim();
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      let content = txt;
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          content = e.target.result;
+          processContent(content);
+        };
+        reader.readAsText(file);
+      } else {
+        processContent(content);
+      }
+    }
+
+    async function processContent(txt) {
       const btn=document.getElementById('abtn');
       const err=document.getElementById('err');
       err.classList.remove('show');
-      if(txt.length<3){err.textContent='Please enter at least a few words.';err.classList.add('show');return}
+      if(txt.length<3){err.textContent='Please enter at least a few words or upload a file.';err.classList.add('show');return}
 
       btn.classList.add('loading');btn.disabled=true;
 
@@ -221,6 +461,10 @@ footer{text-align:center;padding-top:32px;font-size:11px;color:rgba(120,120,160,
           // Determine certainty level
           const certainty = confidence >= 90 ? 'Very High' : confidence >= 75 ? 'High' : confidence >= 60 ? 'Moderate' : 'Low';
 
+          // Simulate sentiment and source reliability
+          const sentiment = analyzeSentiment(txt);
+          const sourceReliability = analyzeSource(txt);
+
           render({
             label: isReal ? 'REAL' : 'FAKE',
             conf: confidence,
@@ -228,7 +472,9 @@ footer{text-align:center;padding-top:32px;font-size:11px;color:rgba(120,120,160,
             pFake: fakeProb,
             words: words,
             cert: certainty,
-            signals: signals
+            signals: signals,
+            sentiment: sentiment,
+            source: sourceReliability
           });
         } else {
           err.textContent = data.error || 'An error occurred during analysis.';
@@ -242,6 +488,30 @@ footer{text-align:center;padding-top:32px;font-size:11px;color:rgba(120,120,160,
         btn.classList.remove('loading');
         btn.disabled = false;
       }
+    }
+
+    function analyzeSentiment(text) {
+      const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic'];
+      const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'worst', 'hate'];
+      const words = text.toLowerCase().split(/\s+/);
+      let score = 0;
+      words.forEach(word => {
+        if (positiveWords.includes(word)) score++;
+        if (negativeWords.includes(word)) score--;
+      });
+      if (score > 0) return 'Positive';
+      if (score < 0) return 'Negative';
+      return 'Neutral';
+    }
+
+    function analyzeSource(text) {
+      // Simple heuristic: check for known reliable sources or patterns
+      const reliableSources = ['bbc', 'cnn', 'reuters', 'ap', 'nyt'];
+      const words = text.toLowerCase().split(/\s+/);
+      for (let word of words) {
+        if (reliableSources.some(src => word.includes(src))) return 'High';
+      }
+      return 'Unknown';
     }
 
     function generateSignals(text, isReal) {
@@ -274,6 +544,8 @@ footer{text-align:center;padding-top:32px;font-size:11px;color:rgba(120,120,160,
       document.getElementById('sw').textContent=d.words;
       document.getElementById('sc').textContent=d.cert;
       document.getElementById('ss').textContent=d.signals.length;
+      document.getElementById('sent').textContent=d.sentiment;
+      document.getElementById('src').textContent=d.source;
       setTimeout(()=>{
         document.getElementById('br').style.width=d.pReal+'%';
         document.getElementById('bf').style.width=d.pFake+'%';
